@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevHire | Job Board</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <nav class="bg-white shadow-sm py-4">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <h1 class="text-2xl font-black text-blue-600">DevHire</h1>
+            <button onclick="document.getElementById('postModal').classList.remove('hidden')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition">Post a Job</button>
+        </div>
+    </nav>
+
+    <header class="bg-blue-600 py-16 text-center text-white">
+        <h2 class="text-4xl font-black mb-4">Find Your Dream Tech Job</h2>
+        <div class="max-w-2xl mx-auto px-6">
+            <input id="searchInput" type="text" placeholder="Search jobs (e.g. React, Backend)..." class="w-full p-4 rounded-xl text-gray-800 shadow-lg outline-none">
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto py-12 px-6">
+        <div id="jobList" class="space-y-4">
+            <p class="text-center text-gray-500">Loading jobs...</p>
+        </div>
+    </main>
+
+    <div id="postModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-8">
+            <h3 class="text-xl font-bold mb-4">Post New Opportunity</h3>
+            <form id="jobForm" class="space-y-4">
+                <input type="text" name="title" placeholder="Job Title" class="w-full border p-3 rounded-lg" required>
+                <input type="text" name="company" placeholder="Company Name" class="w-full border p-3 rounded-lg" required>
+                <input type="text" name="location" placeholder="Location (e.g. Remote)" class="w-full border p-3 rounded-lg" required>
+                <textarea name="description" placeholder="Job Description" class="w-full border p-3 rounded-lg h-32" required></textarea>
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold">Submit</button>
+                    <button type="button" onclick="document.getElementById('postModal').classList.add('hidden')" class="bg-gray-200 px-6 py-2 rounded-lg font-bold">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const jobList = document.getElementById('jobList');
+        const searchInput = document.getElementById('searchInput');
+
+        async function fetchJobs(search = '') {
+            const res = await fetch(`/api/jobs?search=${search}`);
+            const jobs = await res.json();
+            jobList.innerHTML = jobs.map(job => `
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center hover:shadow-md transition">
+                    <div>
+                        <h4 class="text-xl font-bold text-gray-800">${job.title}</h4>
+                        <p class="text-blue-600 font-medium">${job.company} • ${job.location}</p>
+                        <p class="text-sm text-gray-400 mt-1">${new Date(job.postedAt).toLocaleDateString()}</p>
+                    </div>
+                    <button class="bg-gray-100 text-gray-700 px-6 py-2 rounded-full font-bold hover:bg-blue-50 hover:text-blue-600 transition">Apply Now</button>
+                </div>
+            `).join('');
+        }
+
+        searchInput.addEventListener('input', (e) => fetchJobs(e.target.value));
+
+        document.getElementById('jobForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            await fetch('/api/jobs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            e.target.reset();
+            document.getElementById('postModal').classList.add('hidden');
+            fetchJobs();
+        });
+
+        fetchJobs();
+    </script>
+</body>
+</html>
