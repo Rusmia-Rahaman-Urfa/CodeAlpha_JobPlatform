@@ -13,10 +13,9 @@ connectDB();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); // Serves your HTML
-// Add this line under your existing job routes
+app.use(express.static('public')); // Serves the HTML
 app.use('/api/jobs', require('./routes/jobRoutes'));
-app.use('/api/applications', require('./routes/appRoutes')); // <--- Add this!
+app.use('/api/applications', require('./routes/appRoutes')); 
 
 // Routes
 app.use('/api/jobs', require('./routes/jobRoutes'));
