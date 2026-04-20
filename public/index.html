@@ -26,7 +26,7 @@
 
     <nav class="sticky top-0 z-50 glass border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="showJobs()">
                 <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
                     <span class="text-white font-black text-xl">D</span>
                 </div>
@@ -34,8 +34,8 @@
             </div>
             
             <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-                <a href="#" class="hover:text-blue-600 transition">Find Jobs</a>
-                <a href="#" class="hover:text-blue-600 transition">Companies</a>
+                <a href="#" onclick="showJobs()" class="hover:text-blue-600 transition">Find Jobs</a>
+                <a href="#" onclick="showCompanies()" class="hover:text-blue-600 transition">Companies</a>
                 <a href="#" class="hover:text-blue-600 transition">Salaries</a>
             </div>
 
@@ -48,7 +48,7 @@
         </div>
     </nav>
 
-    <header class="relative overflow-hidden pt-20 pb-32">
+    <header id="mainHeader" class="relative overflow-hidden pt-20 pb-32">
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-30">
             <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400 rounded-full blur-[120px]"></div>
             <div class="absolute bottom-[10%] right-[-10%] w-[40%] h-[40%] bg-purple-400 rounded-full blur-[120px]"></div>
@@ -74,7 +74,7 @@
         </div>
     </header>
 
-    <main class="max-w-5xl mx-auto pb-24 px-6">
+    <main id="jobMain" class="max-w-5xl mx-auto pb-24 px-6">
         <div class="flex items-center justify-between mb-10">
             <h3 class="text-xl font-bold text-slate-800">Latest Openings</h3>
             <div class="flex gap-2">
@@ -96,60 +96,68 @@
         </div>
     </main>
 
+    <section id="companySection" class="hidden max-w-5xl mx-auto py-24 px-6">
+        <div class="text-center mb-16">
+            <h3 class="text-4xl font-black text-slate-900 mb-4">Featured Companies</h3>
+            <p class="text-slate-500">Explore top-tier organizations hiring now.</p>
+        </div>
+        <div id="companyList" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            </div>
+    </section>
+
     <div id="postModal" class="hidden fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-6 animate__animated animate__fadeIn">
         <div class="bg-white w-full max-w-xl rounded-[2rem] p-10 shadow-2xl relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 to-purple-600"></div>
-            
             <h3 class="text-3xl font-black mb-2 text-slate-900">Post an Opening</h3>
-            <p class="text-slate-500 mb-8">Reach the best talent in the industry.</p>
-
             <form id="jobForm" class="space-y-5">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Job Title</label>
-                        <input type="text" name="title" id="title" placeholder="e.g. Backend Lead" class="w-full border border-slate-200 p-3.5 rounded-xl outline-none focus:border-blue-500 bg-slate-50" required>
+                        <input type="text" name="title" placeholder="e.g. Backend Lead" class="w-full border border-slate-200 p-3.5 rounded-xl outline-none focus:border-blue-500 bg-slate-50" required>
                     </div>
                     <div class="space-y-2">
                         <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Company</label>
-                        <input type="text" name="company" id="company" placeholder="e.g. Google" class="w-full border border-slate-200 p-3.5 rounded-xl outline-none focus:border-blue-500 bg-slate-50" required>
+                        <input type="text" name="company" placeholder="e.g. Google" class="w-full border border-slate-200 p-3.5 rounded-xl outline-none focus:border-blue-500 bg-slate-50" required>
                     </div>
                 </div>
-
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Location</label>
-                    <input type="text" name="location" id="location" placeholder="e.g. Remote, Dhaka" class="w-full border border-slate-200 p-3.5 rounded-xl outline-none focus:border-blue-500 bg-slate-50" required>
+                    <input type="text" name="location" placeholder="e.g. Remote" class="w-full border border-slate-200 p-3.5 rounded-xl outline-none focus:border-blue-500 bg-slate-50" required>
                 </div>
-
                 <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Job Description</label>
-                    <textarea name="description" id="description" placeholder="Briefly describe the role and requirements..." class="w-full border border-slate-200 p-3.5 rounded-xl outline-none focus:border-blue-500 bg-slate-50 h-32" required></textarea>
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Description</label>
+                    <textarea name="description" placeholder="Describe the role..." class="w-full border border-slate-200 p-3.5 rounded-xl outline-none focus:border-blue-500 bg-slate-50 h-32" required></textarea>
                 </div>
-
                 <div class="flex gap-4 pt-4">
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-4 rounded-xl font-black shadow-lg shadow-blue-100 hover:bg-blue-700 transition active:scale-95">Publish Job</button>
-                    <button type="button" onclick="document.getElementById('postModal').classList.add('hidden')" class="flex-1 bg-slate-100 text-slate-600 py-4 rounded-xl font-bold hover:bg-slate-200 transition">Cancel</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-4 rounded-xl font-black shadow-lg hover:bg-blue-700 transition">Publish Job</button>
+                    <button type="button" onclick="document.getElementById('postModal').classList.add('hidden')" class="flex-1 bg-slate-100 text-slate-600 py-4 rounded-xl font-bold">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="applyModal" class="hidden fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-6 animate__animated animate__zoomIn">
+    <div id="detailModal" class="hidden fixed inset-0 z-[110] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeDetailModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div id="detailContent"></div>
+        </div>
+    </div>
+
+    <div id="applyModal" class="hidden fixed inset-0 z-[120] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-lg rounded-[2rem] p-10 shadow-2xl">
             <h3 id="applyJobTitle" class="text-2xl font-black mb-2 text-slate-900">Apply for Position</h3>
-            <p class="text-slate-500 mb-8">Fill in your details and upload your PDF resume.</p>
-
             <form id="applyForm" class="space-y-4">
                 <input type="hidden" id="applyJobId" name="jobId">
-                <input type="text" name="candidateName" placeholder="Full Name" class="w-full border border-slate-200 p-4 rounded-xl outline-none focus:border-blue-500 bg-slate-50" required>
-                <input type="email" name="candidateEmail" placeholder="Email Address" class="w-full border border-slate-200 p-4 rounded-xl outline-none focus:border-blue-500 bg-slate-50" required>
-                
+                <input type="text" name="candidateName" placeholder="Full Name" class="w-full border border-slate-200 p-4 rounded-xl bg-slate-50" required>
+                <input type="email" name="candidateEmail" placeholder="Email Address" class="w-full border border-slate-200 p-4 rounded-xl bg-slate-50" required>
                 <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Resume (PDF only)</label>
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Resume (PDF)</label>
                     <input type="file" name="resume" accept=".pdf" class="w-full bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-200" required>
                 </div>
-
                 <div class="flex gap-4 pt-4">
-                    <button type="submit" class="flex-1 bg-green-600 text-white py-4 rounded-xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition">Send Application</button>
+                    <button type="submit" class="flex-1 bg-green-600 text-white py-4 rounded-xl font-black hover:bg-green-700 transition">Send Application</button>
                     <button type="button" onclick="document.getElementById('applyModal').classList.add('hidden')" class="flex-1 bg-slate-100 text-slate-600 py-4 rounded-xl font-bold">Close</button>
                 </div>
             </form>
