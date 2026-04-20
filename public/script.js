@@ -138,7 +138,37 @@ async function showCompanies() {
     document.getElementById('companySection').classList.remove('hidden');
     document.querySelector('header').classList.add('hidden');
     document.querySelector('main').classList.add('hidden');
-    // Fetch logic would go here once your User route is ready
+}
+// --- Company Data ---
+const companiesData = [
+    { name: 'Google', logo: 'https://th.bing.com/th/id/OIP.S3bn8v2hysgDyxYDkuEc5wHaHa?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3', desc: 'Organizing the world\'s information and making it universally accessible.' },
+    { name: 'Microsoft', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg', desc: 'Empowering every person and every organization on the planet to achieve more.' },
+    { name: 'Netflix', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg', desc: 'The world\'s leading streaming entertainment service with award-winning content.' },
+    { name: 'Meta', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg', desc: 'Building technologies that help people connect, find communities, and grow businesses.' },
+    { name: 'Amazon', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg', desc: 'Earth\'s most customer-centric company, where people can find anything they want to buy online.' },
+    { name: 'Tesla', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg', desc: 'Accelerating the world\'s transition to sustainable energy with electric cars and solar.' }
+];
+
+// --- Navigation Functions ---
+
+async function showCompanies() {
+    // Switch View
+    document.getElementById('companySection').classList.remove('hidden');
+    document.getElementById('mainHeader').classList.add('hidden');
+    document.getElementById('jobMain').classList.add('hidden');
+
+    // Render Companies
+    const list = document.getElementById('companyList');
+    list.innerHTML = companiesData.map(c => `
+        <div class="company-card bg-white p-8 rounded-[2.5rem] border border-slate-100 flex flex-col items-center text-center animate__animated animate__fadeIn">
+            <div class="h-16 w-full flex items-center justify-center mb-6">
+                <img src="${c.logo}" alt="${c.name}" class="max-h-full max-w-[120px] object-contain">
+            </div>
+            <h4 class="text-xl font-extrabold text-slate-900 mb-3">${c.name}</h4>
+            <p class="text-slate-500 text-sm leading-relaxed">${c.desc}</p>
+            <button class="mt-6 text-blue-600 font-bold text-sm hover:underline">View Openings</button>
+        </div>
+    `).join('');
 }
 
 // Go back to Jobs View
