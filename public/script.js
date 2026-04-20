@@ -1,64 +1,51 @@
-/**
- * DevHire Frontend Logic
- * Handles Job Fetching, Filtering, and Application Submission
- */
-
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
     const jobList = document.getElementById('jobList');
     const searchInput = document.getElementById('searchInput');
     const jobForm = document.getElementById('jobForm');
+    const applyForm = document.getElementById('applyForm');
     const postModal = document.getElementById('postModal');
+    const applyModal = document.getElementById('applyModal');
 
-    // 1. Fetch and Render Jobs
+    // Fetch and Render Jobs
     async function fetchJobs(search = '') {
         try {
             const res = await fetch(`/api/jobs?search=${search}`);
-            if (!res.ok) throw new Error('Network response was not ok');
-            
             const jobs = await res.json();
             
             if (jobs.length === 0) {
-                jobList.innerHTML = `<p class="text-center text-gray-500 py-10">No jobs found matching "${search}"</p>`;
+                jobList.innerHTML = `<div class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                    <p class="text-slate-400 font-medium">No opportunities found. Try a different search.</p>
+                </div>`;
                 return;
             }
 
-            jobList.innerHTML = jobs.map(job => `
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center hover:shadow-md transition gap-4">
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <h4 class="text-xl font-bold text-gray-800">${job.title}</h4>
-                            <span class="px-2 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase rounded-md">${job.type || 'Full-time'}</span>
+            jobList.innerHTML = jobs.map((job, index) => `
+                <div class="job-card bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex gap-6 items-center">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl flex items-center justify-center text-blue-600">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                         </div>
-                        <p class="text-blue-600 font-medium">${job.company} • ${job.location}</p>
-                        <p class="text-sm text-gray-400 mt-2 flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Posted on ${new Date(job.postedAt).toLocaleDateString()}
-                        </p>
+                        <div>
+                            <h4 class="text-xl font-extrabold text-slate-800">${job.title}</h4>
+                            <div class="flex flex-wrap gap-3 mt-1">
+                                <span class="text-blue-600 font-bold text-sm">${job.company}</span>
+                                <span class="text-slate-400 text-sm">•</span>
+                                <span class="text-slate-500 font-medium text-sm">${job.location}</span>
+                            </div>
+                        </div>
                     </div>
-                    <button onclick="openApplyModal('${job._id}', '${job.title}')" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition w-full md:w-auto">
+                    <button onclick="openApplyModal('${job._id}', '${job.title}')" 
+                        class="bg-blue-50 text-blue-600 px-8 py-3.5 rounded-full font-black hover:bg-blue-600 hover:text-white transition-all w-full md:w-auto shadow-sm">
                         Apply Now
                     </button>
                 </div>
             `).join('');
         } catch (error) {
             console.error('Fetch Error:', error);
-            jobList.innerHTML = `<p class="text-center text-red-500 py-10">Error loading jobs. Please check backend connection.</p>`;
         }
     }
 
-    // 2. Handle Search Input (Debounced)
-    let timeout = null;
-    searchInput.addEventListener('input', (e) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            fetchJobs(e.target.value);
-        }, 500); // Wait 500ms after typing stops to reduce server load
-    });
-
-    // 3. Handle Job Posting (Employer View)
+    // Handle Job Posting
     jobForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -66,39 +53,65 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = Object.fromEntries(formData);
 
         try {
-            const response = await fetch('/api/jobs', {
+            const res = await fetch('http://localhost:5006/api/jobs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
 
-            if (response.ok) {
+            if (res.ok) {
+                alert('Job Posted Successfully! 🚀');
                 jobForm.reset();
                 postModal.classList.add('hidden');
-                fetchJobs(); // Refresh list
-                alert('Job posted successfully!');
+                fetchJobs();
+            } else {
+                const errData = await res.json();
+                alert('Error: ' + (errData.msg || 'Failed to post job'));
             }
-        } catch (error) {
-            console.error('Post Error:', error);
-            alert('Failed to post job.');
+        } catch (err) {
+            console.error('Post Error:', err);
+            alert('Server is not responding.');
         }
+    });
+
+    // Handle Job Application (File Upload)
+    applyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(applyForm);
+
+        try {
+            const res = await fetch('http://localhost:5006/api/applications', {
+                method: 'POST',
+                body: formData 
+            });
+
+            if (res.ok) {
+                alert('🚀 Application sent successfully!');
+                applyForm.reset();
+                applyModal.classList.add('hidden');
+            } else {
+                alert('❌ Failed to send application.');
+            }
+        } catch (err) {
+            console.error('Apply Error:', err);
+            alert('Submission failed.');
+        }
+    });
+
+    // Search Logic (Debounced)
+    let timeout;
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fetchJobs(e.target.value), 400);
     });
 
     // Initial Load
     fetchJobs();
 });
 
-/**
- * Global Function to handle Applications
- * Note: For a real platform, you'd trigger a second modal here for the Resume upload.
- */
-function openApplyModal(jobId, jobTitle) {
-    // Professional prompt to demonstrate logic (In production, replace with a dedicated Apply Modal)
-    const name = prompt(`Applying for ${jobTitle}\nEnter your Full Name:`);
-    const email = prompt(`Enter your Email:`);
-    
-    if (name && email) {
-        alert(`Application initialization for ${jobTitle} successful!\nIn the full version, this triggers the Multer PDF upload at /api/applications.`);
-        // Logic for POSTing to /api/applications with FormData would go here
-    }
-}
+// Global Function for Modal
+window.openApplyModal = (id, title) => {
+    document.getElementById('applyJobId').value = id;
+    document.getElementById('applyJobTitle').innerText = title;
+    document.getElementById('applyModal').classList.remove('hidden');
+};
